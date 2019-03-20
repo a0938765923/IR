@@ -21,9 +21,9 @@ import java.util.List;
 public class Index
 {
     private String path;
-    public Directory openPath;
-    public Index(String s, String openFile)throws IOException {
-        openPath=FSDirectory.open(Paths.get(openFile));
+
+    public Index(String s)throws IOException {
+
         path = s;
     }
 
@@ -72,25 +72,24 @@ public class Index
     public String search(String target)throws Exception{
         StandardAnalyzer analyzer = new StandardAnalyzer();
         Query q = new QueryParser("token", analyzer).parse(target);
-        int hitsPerPage = 10;
-        IndexReader reader = DirectoryReader.open(openPath);
+        int hitsPerPage = 100000000;
+        IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(path)));
         IndexSearcher searcher = new IndexSearcher(reader);
         TopDocs docs = searcher.search(q, hitsPerPage);
         ScoreDoc[] hits = docs.scoreDocs;
         System.out.println(docs.scoreDocs.length);
-
         List<String>pos=new ArrayList<>();
-        for(int i=0;i<docs.scoreDocs.length;i++){
+        for(int i=0;i<docs.scoreDocs.length;i++)
+        {
             int doc = docs.scoreDocs[i].doc;
             Document doc2 = searcher.doc(doc);
-
 //            System.out.println("------>"+doc2.getField("token"));
 //            System.out.println("------>"+doc2.getField("pos"));
             pos.add(doc2.getField("pos").stringValue());
 //            System.out.println("------>"+doc2.getField("docId"));
         }
-        String result = target + " , "+pos;
-        System.out.println(result);
+        System.out.println(target+pos);
+
         return "return what?";
     }
 }
